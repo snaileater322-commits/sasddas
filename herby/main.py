@@ -3,8 +3,9 @@ import discord
 from discord.ext import commands, tasks
 from aiohttp import web
 
-# Initialize bot
-bot = commands.Bot(command_prefix="!", self_bot=True)
+# Initialize bot with required v2.x intents configuration
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", self_bot=True, intents=intents)
 
 CHANNEL_ID = 1323861435654213643  
 SPAM_MESSAGE = "asdasdasdasdadasdasdasdasdasdadasdadads" 
@@ -19,7 +20,6 @@ async def start_web_server():
     app.router.add_get('/', handle)
     runner = web.AppRunner(app)
     await runner.setup()
-    # Render automatically passes an internal port via environment variables
     import os
     port = int(os.environ.get("PORT", 8080))
     site = web.TCPSite(runner, '0.0.0.0', port)
@@ -29,7 +29,6 @@ async def start_web_server():
 @bot.event
 async def on_ready():
     print(f"Logged in as: {bot.user.name}")
-    # Start the web server concurrently so Render stays connected
     bot.loop.create_task(start_web_server())
     if not spam_loop.is_running():
         spam_loop.start()
@@ -56,7 +55,6 @@ async def spam_loop():
 
     await asyncio.sleep(WAIT_TIME)
 
-# DO NOT hardcode your token here when uploading to GitHub! 
 import os
 ACCOUNT_TOKEN = os.environ.get("DISCORD_TOKEN")
 bot.run(ACCOUNT_TOKEN)
